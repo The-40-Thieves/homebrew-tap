@@ -1,0 +1,118 @@
+name: bump obsidian-tc formula
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'obsidian-tc release tag to bump to, e.g. v1.28.5 (empty = latest non-prerelease, non-draft release)'
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+
+      - name: Determine target tag
+        id: target
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${INPUT_TAG}" ]]; then
+            tag="${INPUT_TAG}"
+          else
+            # Reading a public repo's releases needs no extra scope beyond the
+            # default read-only github.token.
+            tag=$(gh release list \
+              -R The-40-Thieves/obsidian-tc \
+              --exclude-drafts \
+              --exclude-pre-releases \
+              --limit 1 \
+              --json tagName \
+              --jq '.[0].tagName')
+          fi
+          if [[ -z "${tag}" ]]; then
+            echo "::error::could not determine a target obsidian-tc release tag"
+            exit 1
+          fi
+          echo "tag=${tag}" >>"${GITHUB_OUTPUT}"
+
+      - name: Compare against the formula's current version
+        id: current
+        run: |
+          set -euo pipefail
+          current=$(sed -nE 's/^  version "([^"]+)"$/\1/p' Formula/obsidian-tc.rb)
+          if [[ -z "${current}" ]]; then
+            echo "::error::could not read the current version from Formula/obsidian-tc.rb"
+            exit 1
+          fi
+          echo "current=${current}" >>"${GITHUB_OUTPUT}"
+
+      - name: Download and verify release assets
+        if: steps.target.outputs.tag != format('v{0}', steps.current.outputs.current)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.target.outputs.tag }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/obsidian-tc-release
+          cd /tmp/obsidian-tc-release
+          gh release download "${TAG}" -R The-40-Thieves/obsidian-tc -p 'SHASUMS256.txt'
+          for suffix in darwin-arm64 darwin-x64 linux-arm64 linux-x64; do
+            gh release download "${TAG}" -R The-40-Thieves/obsidian-tc \
+              -p "obsidian-tc-bun-${suffix}"
+          done
+          # Never trust SHASUMS256.txt blindly -- recompute each binary's digest
+          # and require it to match the file's claim before anything downstream
+          # reads a value out of it.
+          for suffix in darwin-arm64 darwin-x64 linux-arm64 linux-x64; do
+            asset="obsidian-tc-bun-${suffix}"
+            expected=$(grep -E "${asset}\$" SHASUMS256.txt | awk '{ print $1 }')
+            if [[ -z "${expected}" ]]; then
+              echo "::error::SHASUMS256.txt has no entry for ${asset}"
+              exit 1
+            fi
+            actual=$(sha256sum "${asset}" | awk '{ print $1 }')
+            if [[ "${actual}" != "${expected}" ]]; then
+              echo "::error::${asset}: downloaded sha256 ${actual} does not match SHASUMS256.txt's ${expected}"
+              exit 1
+            fi
+          done
+
+      - name: Bump the formula
+        if: steps.target.outputs.tag != format('v{0}', steps.current.outputs.current)
+        env:
+          TAG: ${{ steps.target.outputs.tag }}
+          SHASUMS_FILE: /tmp/obsidian-tc-release/SHASUMS256.txt
+          FORMULA_FILE: Formula/obsidian-tc.rb
+        run: |
+          set -euo pipefail
+          scripts/bump-obsidian-tc.sh "${TAG}" "${SHASUMS_FILE}" "${FORMULA_FILE}"
+          ruby -c "${FORMULA_FILE}"
+
+      - name: Commit and push
+        if: steps.target.outputs.tag != format('v{0}', steps.current.outputs.current)
+        env:
+          TAG: ${{ steps.target.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/obsidian-tc.rb
+          git commit -m "obsidian-tc ${TAG}: bump formula"
+          # This tap has no CI to wait for, so pushing straight to main is the
+          # same thing a human maintainer would do by hand for this bump.
+          git push origin HEAD:main
+
+      - name: No update needed
+        if: steps.target.outputs.tag == format('v{0}', steps.current.outputs.current)
+        env:
+          TAG: ${{ steps.target.outputs.tag }}
+        run: echo "::notice::Formula/obsidian-tc.rb is already at ${TAG}, nothing to do"
