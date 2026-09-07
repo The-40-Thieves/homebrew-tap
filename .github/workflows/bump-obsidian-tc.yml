@@ -88,13 +88,14 @@ jobs:
 
       - name: Bump the formula
         if: steps.target.outputs.tag != format('v{0}', steps.current.outputs.current)
+        env:
+          TAG: ${{ steps.target.outputs.tag }}
+          SHASUMS_FILE: /tmp/obsidian-tc-release/SHASUMS256.txt
+          FORMULA_FILE: Formula/obsidian-tc.rb
         run: |
           set -euo pipefail
-          scripts/bump-obsidian-tc.sh \
-            "${{ steps.target.outputs.tag }}" \
-            /tmp/obsidian-tc-release/SHASUMS256.txt \
-            Formula/obsidian-tc.rb
-          ruby -c Formula/obsidian-tc.rb
+          scripts/bump-obsidian-tc.sh "${TAG}" "${SHASUMS_FILE}" "${FORMULA_FILE}"
+          ruby -c "${FORMULA_FILE}"
 
       - name: Commit and push
         if: steps.target.outputs.tag != format('v{0}', steps.current.outputs.current)
@@ -112,4 +113,6 @@ jobs:
 
       - name: No update needed
         if: steps.target.outputs.tag == format('v{0}', steps.current.outputs.current)
-        run: echo "::notice::Formula/obsidian-tc.rb is already at ${{ steps.target.outputs.tag }}, nothing to do"
+        env:
+          TAG: ${{ steps.target.outputs.tag }}
+        run: echo "::notice::Formula/obsidian-tc.rb is already at ${TAG}, nothing to do"
