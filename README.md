@@ -46,3 +46,21 @@ asset matches what the formula installs. **This formula must be bumped by
 hand on every obsidian-tc release** (`version` + four `sha256` values) —
 `obsidian-tc`'s `publish.yml` does not yet open a PR here automatically; that
 automation is a follow-up, not yet built.
+
+## Automation
+
+`.github/workflows/bump-obsidian-tc.yml` keeps `Formula/obsidian-tc.rb`
+current on its own: every 6 hours (and on demand) it checks the latest
+non-prerelease, non-draft release of `The-40-Thieves/obsidian-tc`, and if the
+formula's `version` is already at that tag it does nothing. Otherwise it
+downloads that release's `SHASUMS256.txt` and all four platform binaries,
+independently verifies each binary's sha256 against the file before trusting
+it, rewrites the formula's `version` and four `sha256` lines
+(`scripts/bump-obsidian-tc.sh`), and pushes the commit straight to `main` as
+`github-actions[bot]` (this tap has no CI to gate the push on). It runs
+tap-side rather than as a push from obsidian-tc's own `publish.yml` because a
+same-repo commit only needs this workflow's own `GITHUB_TOKEN`, while a
+cross-repo push would need a PAT or GitHub App. It never pushes a tag or cuts
+a release here -- only the formula file changes. To run it by hand: **Actions
+→ bump obsidian-tc formula → Run workflow**, optionally filling in a specific
+`tag` (e.g. `v1.28.5`); leave it blank to bump to the latest release.
