@@ -1,7 +1,7 @@
 class ObsidianTc < Formula
   desc "Model-agnostic MCP server for Obsidian vaults with RBAC and native search"
   homepage "https://github.com/The-40-Thieves/obsidian-tc"
-  version "1.28.4"
+  version "1.29.0"
   license "AGPL-3.0-only"
 
   # Prebuilt Bun standalone binaries, published per-platform on every GitHub release
@@ -14,22 +14,22 @@ class ObsidianTc < Formula
   on_macos do
     on_arm do
       url "https://github.com/The-40-Thieves/obsidian-tc/releases/download/v#{version}/obsidian-tc-bun-darwin-arm64"
-      sha256 "1c14613b2449ab32390e2ace6038aed4029b08719c29646bdcaa0cc423805424"
+      sha256 "9b238c616cf2e7b79ea21302634fef09079633115149a24921a4aa9ac6a9a52d"
     end
     on_intel do
       url "https://github.com/The-40-Thieves/obsidian-tc/releases/download/v#{version}/obsidian-tc-bun-darwin-x64"
-      sha256 "05e1d6e0c0eb9ad8fc81e70f2acd8b5cefe4cac5a1c1957fea2d58146f57ac2f"
+      sha256 "c68109f1901bfed264e9f36fcfce273fe8ebba5df5ab133e4b7ee23434dfd053"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/The-40-Thieves/obsidian-tc/releases/download/v#{version}/obsidian-tc-bun-linux-arm64"
-      sha256 "272b2b5365ab33039f520ca70b9ef274bf84158a2650f97279cabf15188a40c2"
+      sha256 "de6d28b09fd4b5f80cca404480daf416e17ad9a0c765845c6da4de88dc256370"
     end
     on_intel do
       url "https://github.com/The-40-Thieves/obsidian-tc/releases/download/v#{version}/obsidian-tc-bun-linux-x64"
-      sha256 "029b46ee755417742d7d10a7d232f9b8545287afe911ff7aacc79265114724a6"
+      sha256 "02a46be32741f6fc42a1c0b28dfd5c1deb4160bfb3644f8d9c730bd4cd35f1df"
     end
   end
 
