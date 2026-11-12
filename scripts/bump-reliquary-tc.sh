@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Rewrites Formula/obsidian-tc.rb's `version` line and its four platform
-# `sha256` lines to match a new obsidian-tc release.
+# Rewrites Formula/reliquary-tc.rb's `version` line and its four platform
+# `sha256` lines to match a new reliquary-tc release.
 #
 # Usage:
-#   bump-obsidian-tc.sh <tag> <shasums-file> <formula-file>
+#   bump-reliquary-tc.sh <tag> <shasums-file> <formula-file>
 #
 #   <tag>           release tag, e.g. v1.28.5 (the leading "v" is stripped
 #                   to produce the formula's `version` string)
@@ -11,7 +11,7 @@
 #                   verified by the caller against the actual downloaded
 #                   binaries -- this script trusts the digests it is given,
 #                   it does not itself check them against any binary
-#   <formula-file>  path to Formula/obsidian-tc.rb (edited in place)
+#   <formula-file>  path to Formula/reliquary-tc.rb (edited in place)
 #
 # Idempotent: running it again with the same tag and shasums against a
 # formula that already carries that version/digests produces no diff.
@@ -41,11 +41,11 @@ platform_suffixes=(darwin-arm64 darwin-x64 linux-arm64 linux-x64)
 
 sha_for_suffix() {
   local suffix=$1 line
-  # SHASUMS256.txt lines look like "<sha>  ./binary-.../obsidian-tc-bun-<suffix>";
+  # SHASUMS256.txt lines look like "<sha>  ./binary-.../reliquary-tc-bun-<suffix>";
   # anchor on the filename suffix so a path prefix doesn't matter.
-  line=$(grep -E "obsidian-tc-bun-${suffix}\$" "$shasums_file" || true)
+  line=$(grep -E "reliquary-tc-bun-${suffix}\$" "$shasums_file" || true)
   if [[ -z $line ]]; then
-    echo "$0: no digest for obsidian-tc-bun-${suffix} in ${shasums_file}" >&2
+    echo "$0: no digest for reliquary-tc-bun-${suffix} in ${shasums_file}" >&2
     exit 1
   fi
   awk '{ print $1 }' <<<"$line"
@@ -61,7 +61,7 @@ for suffix in "${platform_suffixes[@]}"; do
   sha=$(sha_for_suffix "$suffix")
   # Rewrite only the sha256 line immediately following the url line that
   # names this platform's asset, so each digest lands in its own block.
-  awk -v needle="obsidian-tc-bun-${suffix}" -v sha="$sha" '
+  awk -v needle="reliquary-tc-bun-${suffix}" -v sha="$sha" '
     $0 ~ needle { target = NR + 1 }
     NR == target { sub(/sha256 "[^"]*"/, "sha256 \"" sha "\"") }
     { print }

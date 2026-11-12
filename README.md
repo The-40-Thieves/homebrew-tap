@@ -6,7 +6,7 @@ Homebrew tap for The 40 Thieves tools.
 
 ```
 brew install the-40-thieves/tap/alexandria-mcp
-brew install the-40-thieves/tap/obsidian-tc
+brew install the-40-thieves/tap/reliquary-tc
 ```
 
 ## Formulae
@@ -16,10 +16,10 @@ brew install the-40-thieves/tap/obsidian-tc
   government records, security advisories, news, and developer docs). Wraps
   the `@the-40-thieves/alexandria-mcp` npm package. Homepage:
   https://github.com/The-40-Thieves/alexandria-mcp
-- `obsidian-tc`: model-agnostic, agent-ready MCP server for Obsidian vaults
+- `reliquary-tc`: model-agnostic, agent-ready MCP server for Obsidian vaults
   with RBAC, SLSA provenance, and native search. Installs the prebuilt Bun
   standalone binary published on each GitHub release (macOS arm64/x64, Linux
-  arm64/x64). Homepage: https://github.com/The-40-Thieves/obsidian-tc
+  arm64/x64). Homepage: https://github.com/The-40-Thieves/reliquary-tc
 
 ## Assets
 
@@ -35,7 +35,7 @@ considered fully verified. The formula was written against the documented
 `std_npm_args` / `libexec` pattern for npm-based formulae and the tarball
 sha256 was computed directly from the published npm package.
 
-`obsidian-tc.rb` has the same gap — no `brew` on the authoring host, so
+`reliquary-tc.rb` has the same gap — no `brew` on the authoring host, so
 `brew audit`/`brew install --formula`/`brew test` for it still need to run on
 a Mac (or a Linux box with Homebrew) before it is fully verified. Its four
 `sha256` values were independently computed (`shasum -a 256`) from the
@@ -43,24 +43,24 @@ downloaded `v1.28.4` release assets and cross-checked against that release's
 `SHASUMS256.txt` and GitHub's own per-asset `digest` field; the linux-arm64
 binary was executed directly (`--version` printed `1.28.4`) as evidence the
 asset matches what the formula installs. **This formula must be bumped by
-hand on every obsidian-tc release** (`version` + four `sha256` values) —
-`obsidian-tc`'s `publish.yml` does not yet open a PR here automatically; that
+hand on every reliquary-tc release** (`version` + four `sha256` values) —
+`reliquary-tc`'s `publish.yml` does not yet open a PR here automatically; that
 automation is a follow-up, not yet built.
 
 ## Automation
 
-`.github/workflows/bump-obsidian-tc.yml` keeps `Formula/obsidian-tc.rb`
+`.github/workflows/bump-reliquary-tc.yml` keeps `Formula/reliquary-tc.rb`
 current on its own: every 6 hours (and on demand) it checks the latest
-non-prerelease, non-draft release of `The-40-Thieves/obsidian-tc`, and if the
+non-prerelease, non-draft release of `The-40-Thieves/reliquary-tc`, and if the
 formula's `version` is already at that tag it does nothing. Otherwise it
 downloads that release's `SHASUMS256.txt` and all four platform binaries,
 independently verifies each binary's sha256 against the file before trusting
 it, rewrites the formula's `version` and four `sha256` lines
-(`scripts/bump-obsidian-tc.sh`), and pushes the commit straight to `main` as
+(`scripts/bump-reliquary-tc.sh`), and pushes the commit straight to `main` as
 `github-actions[bot]` (this tap has no CI to gate the push on). It runs
-tap-side rather than as a push from obsidian-tc's own `publish.yml` because a
+tap-side rather than as a push from reliquary-tc's own `publish.yml` because a
 same-repo commit only needs this workflow's own `GITHUB_TOKEN`, while a
 cross-repo push would need a PAT or GitHub App. It never pushes a tag or cuts
 a release here -- only the formula file changes. To run it by hand: **Actions
-→ bump obsidian-tc formula → Run workflow**, optionally filling in a specific
+→ bump reliquary-tc formula → Run workflow**, optionally filling in a specific
 `tag` (e.g. `v1.28.5`); leave it blank to bump to the latest release.
