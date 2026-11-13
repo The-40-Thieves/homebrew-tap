@@ -1,7 +1,7 @@
 class ReliquaryTc < Formula
   desc "Model-agnostic MCP server for Obsidian vaults with RBAC and native search"
   homepage "https://github.com/The-40-Thieves/reliquary-tc"
-  version "1.34.0"
+  version "2.0.1"
   license "Apache-2.0"
 
   # Prebuilt Bun standalone binaries, published per-platform on every GitHub release
@@ -14,22 +14,22 @@ class ReliquaryTc < Formula
   on_macos do
     on_arm do
       url "https://github.com/The-40-Thieves/reliquary-tc/releases/download/v#{version}/reliquary-tc-bun-darwin-arm64"
-      sha256 "234049e0a141be4240a5a7028a4a8e4e02606ffaabb0a626668ddbd3ab9fcb69"
+      sha256 "cf0e7ab5e2c1d9f7ad5f3681fd1669ce09c25b4e5fa9d53ae8e16060321d9893"
     end
     on_intel do
       url "https://github.com/The-40-Thieves/reliquary-tc/releases/download/v#{version}/reliquary-tc-bun-darwin-x64"
-      sha256 "8cdfbaa97663db8991450e8e94af1042721a6ee6b72a012c868ebc2ec64c55aa"
+      sha256 "c728d5bc85c2600292b969c9ac6e8de74d01efe8071afcba2890901a7d787ad6"
     end
   end
 
   on_linux do
     on_arm do
       url "https://github.com/The-40-Thieves/reliquary-tc/releases/download/v#{version}/reliquary-tc-bun-linux-arm64"
-      sha256 "78b66ac4ccc4eda76fbee4f9104eb3a9a0f59294953bca44f8faa0488b3330da"
+      sha256 "6365689878b0ffa7e9f56b52e6744a2616642d75246a942081dc5451405a1210"
     end
     on_intel do
       url "https://github.com/The-40-Thieves/reliquary-tc/releases/download/v#{version}/reliquary-tc-bun-linux-x64"
-      sha256 "069a5c0dc28f13d24236fffa6a35abc340d7570f510ea1f9efda410cf8558bb5"
+      sha256 "b1b1ee21b376e2b857c59b67bcd7f31d2e9ae7db85204586c6ba3d7f1ed9ebad"
     end
   end
 
